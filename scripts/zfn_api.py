@@ -400,7 +400,7 @@ class Client:
             "xqm": str(term),  # 学期数，第一学期为3，第二学期为12, 整个学年为空''
             "_search": "false",
             "nd": int(time.time() * 1000),
-            "queryModel.showCount": "100",  # 每页最多条数
+            "queryModel.showCount": "5000",  # 每页最多条数
             "queryModel.currentPage": "1",
             "queryModel.sortName": "",
             "queryModel.sortOrder": "asc",

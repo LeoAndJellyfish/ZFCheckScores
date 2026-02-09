@@ -35,12 +35,19 @@ def get_grade(student_client, output_type="none"):
         # 成绩不为空时
         if grade:
             # 过滤出成绩大于等于60分的课程，并排除PNP课程
+            # PNP课程的判断条件：
+            # 1. grade字段为"P"、"NP"、"p"、"np"
+            # 2. percentage_grades字段为"P"、"NP"、"p"、"np"
+            # 3. grade_point字段为None、0、"0.0"、"无"或空字符串
+            # 4. xfjd字段为None、"无"或空字符串
             filtered_grade = list(
                 filter(
                     lambda x: (
                         safe_float(x.get("percentage_grades")) >= 60
                         and x.get("grade") not in ["P", "NP", "p", "np"]
                         and x.get("percentage_grades") not in ["P", "NP", "p", "np"]
+                        and x.get("grade_point") not in [None, "0.0", "0", "无", ""]
+                        and x.get("xfjd") not in [None, "无", ""]
                     ),
                     grade
                 )
@@ -98,8 +105,8 @@ def get_grade(student_client, output_type="none"):
             # 初始化输出成绩信息字符串
             integrated_grade_info = "------\n成绩信息："
 
-            # 遍历前8条成绩信息
-            for _, course in enumerate(sorted_grade[:8]):
+            # 遍历所有成绩信息
+            for _, course in enumerate(sorted_grade):
 
                 # 如果成绩非数字，如及格、良好、中等、优秀等，则显示百分制成绩
                 try:
