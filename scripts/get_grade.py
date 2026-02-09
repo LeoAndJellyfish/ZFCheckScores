@@ -34,7 +34,8 @@ def get_grade(student_client, output_type="none"):
 
         # 成绩不为空时
         if grade:
-            # 过滤出成绩大于等于60分的课程，并排除PNP课程和免修课程
+            # 过滤出百分制成绩大于等于60分的课程，并排除PNP课程和免修课程
+            # 只纳入百分制成绩，排除优良制成绩（如"优秀"、"良好"、"中等"、"及格"等）
             # PNP课程的判断条件：
             # 1. grade字段为"P"、"NP"、"p"、"np"
             # 2. percentage_grades字段为"P"、"NP"、"p"、"np"
@@ -43,22 +44,40 @@ def get_grade(student_client, output_type="none"):
             # 免修课程的判断条件：
             # 1. grade字段包含"免修"、"免"等关键词
             # 2. percentage_grades字段包含"免修"、"免"等关键词
-            filtered_grade = list(
-                filter(
-                    lambda x: (
-                        safe_float(x.get("percentage_grades")) >= 60
-                        and x.get("grade") not in ["P", "NP", "p", "np"]
-                        and x.get("percentage_grades") not in ["P", "NP", "p", "np"]
-                        and x.get("grade_point") not in [None, "0.0", "0", "无", ""]
-                        and x.get("xfjd") not in [None, "无", ""]
-                        and "免修" not in str(x.get("grade", ""))
-                        and "免" not in str(x.get("grade", ""))
-                        and "免修" not in str(x.get("percentage_grades", ""))
-                        and "免" not in str(x.get("percentage_grades", ""))
-                    ),
-                    grade
-                )
-            )
+            # 优良制成绩的判断条件：
+            # 1. grade字段为"优秀"、"良好"、"中等"、"及格"、"不及格"等
+            # 2. percentage_grades字段为"优秀"、"良好"、"中等"、"及格"、"不及格"等
+            def is_percentage_grade(course):
+                grade_value = course.get("grade", "")
+                percentage_value = course.get("percentage_grades", "")
+                
+                # 检查是否为优良制成绩
+                grade_level_words = ["优秀", "良好", "中等", "及格", "不及格", "优", "良", "中", "差"]
+                if any(word in str(grade_value) for word in grade_level_words):
+                    return False
+                if any(word in str(percentage_value) for word in grade_level_words):
+                    return False
+                
+                # 检查是否为PNP课程
+                if grade_value in ["P", "NP", "p", "np"]:
+                    return False
+                if percentage_value in ["P", "NP", "p", "np"]:
+                    return False
+                
+                # 检查是否为免修课程
+                if "免修" in str(grade_value) or "免" in str(grade_value):
+                    return False
+                if "免修" in str(percentage_value) or "免" in str(percentage_value):
+                    return False
+                
+                # 检查是否有有效的百分制成绩
+                try:
+                    percentage_num = float(percentage_value)
+                    return percentage_num >= 60
+                except (TypeError, ValueError):
+                    return False
+            
+            filtered_grade = list(filter(is_percentage_grade, grade))
 
             # 遍历 grade 中的每个字典，将 title 中的中文括号替换为英文括号
             for course_data_grade in grade:
