@@ -34,12 +34,15 @@ def get_grade(student_client, output_type="none"):
 
         # 成绩不为空时
         if grade:
-            # 过滤出成绩大于等于60分的课程，并排除PNP课程
+            # 过滤出成绩大于等于60分的课程，并排除PNP课程和免修课程
             # PNP课程的判断条件：
             # 1. grade字段为"P"、"NP"、"p"、"np"
             # 2. percentage_grades字段为"P"、"NP"、"p"、"np"
             # 3. grade_point字段为None、0、"0.0"、"无"或空字符串
             # 4. xfjd字段为None、"无"或空字符串
+            # 免修课程的判断条件：
+            # 1. grade字段包含"免修"、"免"等关键词
+            # 2. percentage_grades字段包含"免修"、"免"等关键词
             filtered_grade = list(
                 filter(
                     lambda x: (
@@ -48,6 +51,10 @@ def get_grade(student_client, output_type="none"):
                         and x.get("percentage_grades") not in ["P", "NP", "p", "np"]
                         and x.get("grade_point") not in [None, "0.0", "0", "无", ""]
                         and x.get("xfjd") not in [None, "无", ""]
+                        and "免修" not in str(x.get("grade", ""))
+                        and "免" not in str(x.get("grade", ""))
+                        and "免修" not in str(x.get("percentage_grades", ""))
+                        and "免" not in str(x.get("percentage_grades", ""))
                     ),
                     grade
                 )
