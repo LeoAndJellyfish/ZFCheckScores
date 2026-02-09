@@ -34,9 +34,16 @@ def get_grade(student_client, output_type="none"):
 
         # 成绩不为空时
         if grade:
-            # 过滤出成绩大于等于60分的课程
+            # 过滤出成绩大于等于60分的课程，并排除PNP课程
             filtered_grade = list(
-                filter(lambda x: safe_float(x.get("percentage_grades")) >= 60, grade)
+                filter(
+                    lambda x: (
+                        safe_float(x.get("percentage_grades")) >= 60
+                        and x.get("grade") not in ["P", "NP", "p", "np"]
+                        and x.get("percentage_grades") not in ["P", "NP", "p", "np"]
+                    ),
+                    grade
+                )
             )
 
             # 遍历 grade 中的每个字典，将 title 中的中文括号替换为英文括号
