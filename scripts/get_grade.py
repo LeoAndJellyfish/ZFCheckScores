@@ -34,43 +34,20 @@ def get_grade(student_client, output_type="none"):
 
         # 成绩不为空时
         if grade:
-            # 过滤出百分制成绩大于等于60分的课程，并排除PNP课程和免修课程
-            # 只纳入百分制成绩，排除优良制成绩（如"优秀"、"良好"、"中等"、"及格"等）
-            # PNP课程的判断条件：
-            # 1. grade字段为"P"、"NP"、"p"、"np"
-            # 2. percentage_grades字段为"P"、"NP"、"p"、"np"
-            # 3. grade_point字段为None、0、"0.0"、"无"或空字符串
-            # 4. xfjd字段为None、"无"或空字符串
-            # 免修课程的判断条件：
-            # 1. grade字段包含"免修"、"免"等关键词
-            # 2. percentage_grades字段包含"免修"、"免"等关键词
-            # 优良制成绩的判断条件：
-            # 1. grade字段为"优秀"、"良好"、"中等"、"及格"、"不及格"等
-            # 2. percentage_grades字段为"优秀"、"良好"、"中等"、"及格"、"不及格"等
+            # 过滤出百分制成绩大于等于60分的课程
+            # 只纳入百分制成绩（grade字段为数字），自动排除优良制成绩、PNP课程和免修课程
             def is_percentage_grade(course):
                 grade_value = course.get("grade", "")
                 percentage_value = course.get("percentage_grades", "")
                 
-                # 检查是否为优良制成绩
-                grade_level_words = ["优秀", "良好", "中等", "及格", "不及格", "优", "良", "中", "差"]
-                if any(word in str(grade_value) for word in grade_level_words):
-                    return False
-                if any(word in str(percentage_value) for word in grade_level_words):
-                    return False
-                
-                # 检查是否为PNP课程
-                if grade_value in ["P", "NP", "p", "np"]:
-                    return False
-                if percentage_value in ["P", "NP", "p", "np"]:
+                # 检查grade字段是否为数字（百分制成绩）
+                try:
+                    float(grade_value)
+                except (TypeError, ValueError):
+                    # grade不是数字，说明是优良制成绩、PNP课程或免修课程，排除
                     return False
                 
-                # 检查是否为免修课程
-                if "免修" in str(grade_value) or "免" in str(grade_value):
-                    return False
-                if "免修" in str(percentage_value) or "免" in str(percentage_value):
-                    return False
-                
-                # 检查是否有有效的百分制成绩
+                # 检查百分制成绩是否>=60
                 try:
                     percentage_num = float(percentage_value)
                     return percentage_num >= 60
