@@ -1,10 +1,8 @@
-# 正方教务管理系统成绩推送（中财版）
+# 正方教务管理系统成绩推送
 
 <img src="https://raw.githubusercontent.com/NianBroken/ZFCheckScores/main/img/7.jpg" style="zoom:60%;" />
 
 ## 简介
-
-> 本项目是基于 [NianBroken/ZFCheckScores](https://github.com/NianBroken/ZFCheckScores) 项目的一个 fork 版本，主要目的是为了适配中财教务管理系统的GPA成绩计算方式。
 
 **使用本项目前：**
 
